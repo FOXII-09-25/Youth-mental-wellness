@@ -1,1 +1,3 @@
 # Youth-mental-wellness
+#Project Overview
+Bloom Youth MindCare is an innovative web-based prototype designed as a game-changing therapeutic AI companion for young Indians. It directly addresses the critical gaps in mental wellness accessibility caused by high costs and social stigma. Our solution moves beyond conventional chatbots by offering a unique multimodal approach, fostering genuine connection through an empathetic AI persona. Bloom aims to be an affordable, approachable, and always-available bridge to wellness, empowering young people to connect with their own inner strength in a safe, creative, and non-intrusive way.
