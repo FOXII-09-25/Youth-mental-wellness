@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOUTH MENTAL WELLNESS: Your Bridge to Wellness</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .chat-bubble {
+            max-width: 80%;
+            border-radius: 1.5rem;
+            padding: 0.75rem 1.25rem;
+        }
+        .user-bubble {
+            background-color: #6d28d9;
+            color: white;
+            border-bottom-right-radius: 0.5rem;
+        }
+        .ai-bubble {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            border-bottom-left-radius: 0.5rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        /* Canvas specific styles */
+        #mood-canvas, #thought-stream-canvas {
+            border: 2px solid #e5e7eb;
+            touch-action: none;
+        }
+        .color-circle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .color-circle.selected {
+            border-color: #4b5563;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-violet-50 via-white to-sky-50 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main App Container -->
+    <div class="relative bg-white rounded-3xl shadow-xl w-full max-w-2xl h-[90vh] flex flex-col overflow-hidden">
+        
+        <!-- Header -->
+        <header class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h1 class="text-3xl font-bold text-gray-900">Youth Mental Wellness</h1>
+            <div class="flex items-center space-x-2">
+                <span class="text-sm font-medium text-gray-500">SATHI</span>
+                <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Area -->
+        <div id="content-container" class="flex-1 p-6 overflow-y-auto">
+            <!-- Daily Bridge Card (Initial View) -->
+            <div id="daily-bridge-view" class="flex flex-col items-center justify-center h-full text-center">
+                <div class="bg-violet-100 p-8 rounded-3xl shadow-xl border-t-8 border-violet-500 w-full max-w-sm">
+                    <h2 class="text-2xl font-bold text-violet-800 mb-2">Your Daily Bridge</h2>
+                    <p class="text-lg text-violet-700 font-medium mb-4">You've made it through another day. A small victory is still a victory.</p>
+                    <p class="text-sm text-gray-600">This is a reminder that you're stronger than you think. Let's start the conversation when you're ready.</p>
+                </div>
+                <button onclick="showChat()" class="mt-8 px-6 py-3 bg-violet-600 text-white rounded-full font-medium shadow-lg hover:bg-violet-700 transition-colors">
+                    Start Chatting
+                </button>
+            </div>
+            
+            <!-- Chat View (Hidden by default) -->
+            <div id="chat-view" class="hidden flex flex-col h-full space-y-4">
+                <div id="chat-container" class="flex-1 space-y-4 overflow-y-auto custom-scrollbar">
+                    <!-- Initial AI Greeting -->
+                    <div class="flex items-end space-x-2 animate-fade-in">
+                        <div class="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 20h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div class="ai-bubble chat-bubble shadow-md">
+                            <p class="text-base">Hey there! I'm your private wellness companion. Feeling a little low or just need to talk? I'm here for you, no judgment.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-gray-200 flex items-center space-x-2">
+                    <input type="text" id="chat-input" placeholder="Type your message..." class="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                    <button id="send-btn" class="p-3 bg-violet-600 text-white rounded-full shadow-lg hover:bg-violet-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Toolkit View (Hidden by default) -->
+            <div id="toolkit-view" class="hidden flex flex-col h-full space-y-4 overflow-y-auto">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Your Toolkit for Well-being</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Mini-Skill: Listen Mode -->
+                    <div class="bg-fuchsia-100 p-6 rounded-3xl shadow-lg border border-fuchsia-200 text-center flex flex-col items-center">
+                        <h3 class="font-bold text-xl text-fuchsia-800 mb-2">Listen Mode</h3>
+                        <p class="text-sm text-fuchsia-700 mb-4">Don't feel like typing? Talk it out. Tap and hold to speak.</p>
+                        <button id="listen-btn" class="w-20 h-20 bg-fuchsia-600 text-white rounded-full flex items-center justify-center hover:bg-fuchsia-700 transition-colors">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.41-5.59L19 11l-1.59 2.59-2.59-1.59-2.59 1.59L13 11l-1.59-2.59L12 6.82l-2.59 1.59L9 11l1.59 2.59L12 14.18l-1.59-2.59L9 11l1.59 2.59zM12 19c2.76 0 5-2.24 5-5h-2c0 1.66-1.34 3-3 3s-3-1.34-3-3H7c0 2.76 2.24 5 5 5zm-4 2c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-1H8v1z"/></svg>
+                        </button>
+                    </div>
+                    <!-- Mini-Skill: Exam Calm -->
+                    <div class="bg-violet-100 p-6 rounded-3xl shadow-lg border border-violet-200">
+                        <h3 class="font-bold text-xl text-violet-800 mb-2">Exam Calm</h3>
+                        <p class="text-sm text-violet-700 mb-4">A 2-minute routine to help you focus and reduce pressure.</p>
+                        <button onclick="startSkill('exam')" class="w-full p-2 bg-violet-600 text-white rounded-full hover:bg-violet-700 transition-colors font-medium text-sm">Start Now</button>
+                    </div>
+                    <!-- Mini-Skill: Loneliness Buster -->
+                    <div class="bg-blue-100 p-6 rounded-3xl shadow-lg border border-blue-200">
+                        <h3 class="font-bold text-xl text-blue-800 mb-2">Loneliness Buster</h3>
+                        <p class="text-sm text-blue-700 mb-4">Simple, non-intimidating actions to help you connect.</p>
+                        <button onclick="startSkill('loneliness')" class="w-full p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors font-medium text-sm">Start Now</button>
+                    </div>
+                    <!-- Mini-Skill: Sleep Wind-Down -->
+                    <div class="bg-teal-100 p-6 rounded-3xl shadow-lg border border-teal-200">
+                        <h3 class="font-bold text-xl text-teal-800 mb-2">Sleep Wind-Down</h3>
+                        <p class="text-sm text-teal-700 mb-4">A simple routine for better sleep after a long day.</p>
+                        <button onclick="startSkill('sleep')" class="w-full p-2 bg-teal-600 text-white rounded-full hover:bg-teal-700 transition-colors font-medium text-sm">Start Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Anonymous Community Wall (Hidden by default) -->
+            <div id="community-view" class="hidden flex flex-col h-full space-y-6 overflow-y-auto">
+                <h2 class="text-2xl font-semibold text-gray-800">Community Wall</h2>
+                <p class="text-gray-500 text-sm italic mb-4">Share what's on your mind. It's completely anonymous.</p>
+                <div id="posts-container" class="space-y-4">
+                    <!-- Simulated Posts -->
+                    <div class="bg-gray-100 p-4 rounded-xl shadow-md">
+                        <p class="text-sm text-gray-700 mb-2">"Got 2 backlogs to clear. Padhai nahi ho rahi, bas tension hai."</p>
+                        <span class="text-xs text-gray-400">Anonymous | 10 mins ago</span>
+                    </div>
+                    <div class="bg-gray-100 p-4 rounded-xl shadow-md">
+                        <p class="text-sm text-gray-700 mb-2">"Just feeling so lonely in my hostel room today. Missing ghar ka khana."</p>
+                        <span class="text-xs text-gray-400">Anonymous | 25 mins ago</span>
+                    </div>
+                    <div class="bg-gray-100 p-4 rounded-xl shadow-md">
+                        <p class="text-sm text-gray-700 mb-2">"My parents don't understand that I need a break. All they see is marks."</p>
+                        <span class="text-xs text-gray-400">Anonymous | 1 hour ago</span>
+                    </div>
+                </div>
+                <input type="text" id="community-input" placeholder="Share your feelings anonymously..." class="w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                <button onclick="postToCommunity()" class="mt-2 w-full max-w-sm mx-auto p-3 bg-violet-600 text-white rounded-full shadow-lg hover:bg-violet-700 transition-colors font-medium text-sm">
+                    Post Anonymously
+                </button>
+            </div>
+            
+            <!-- Community Notes View (Hidden by default) -->
+            <div id="notes-view" class="hidden flex flex-col h-full space-y-6 overflow-y-auto">
+                <h2 class="text-2xl font-semibold text-gray-800">Community Notes</h2>
+                <p class="text-gray-500 text-sm italic mb-4">Leave a positive, anonymous note for a fellow student.</p>
+                <div id="notes-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Simulated Notes -->
+                    <div class="bg-yellow-100 p-4 rounded-xl shadow-md transform -rotate-2">
+                        <p class="text-sm text-yellow-800">"You are doing better than you think you are. Keep going!"</p>
+                    </div>
+                    <div class="bg-green-100 p-4 rounded-xl shadow-md transform rotate-1">
+                        <p class="text-sm text-green-800">"A small step forward is still a step forward. Be kind to yourself today."</p>
+                    </div>
+                    <div class="bg-blue-100 p-4 rounded-xl shadow-md transform rotate-3">
+                        <p class="text-sm text-blue-800">"It's okay to feel overwhelmed. Your feelings are valid."</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex flex-col space-y-2">
+                    <textarea id="note-input" rows="3" placeholder="Write a note to an anonymous peer..." class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"></textarea>
+                    <button onclick="leaveNote()" class="w-full max-w-sm mx-auto p-3 bg-violet-600 text-white rounded-full shadow-lg hover:bg-violet-700 transition-colors font-medium text-sm">
+                        Leave a Note
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mood Canvas View (Hidden by default) -->
+            <div id="canvas-view" class="hidden flex flex-col h-full items-center justify-center p-4">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Express Yourself</h2>
+                <p class="text-gray-500 text-sm italic mb-4">Draw how you feel using colors. No words needed.</p>
+                
+                <canvas id="mood-canvas" class="w-full max-w-lg h-64 bg-gray-50 rounded-xl shadow-inner"></canvas>
+                
+                <div class="flex items-center space-x-4 mt-4 mb-6">
+                    <span class="text-sm text-gray-600 font-medium">Pick a color:</span>
+                    <div id="color-palette" class="flex space-x-2">
+                        <button class="color-circle bg-blue-500 selected" data-color="#3b82f6"></button>
+                        <button class="color-circle bg-red-500" data-color="#ef4444"></button>
+                        <button class="color-circle bg-yellow-500" data-color="#eab308"></button>
+                        <button class="color-circle bg-green-500" data-color="#22c55e"></button>
+                        <button class="color-circle bg-gray-500" data-color="#6b7280"></button>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button onclick="clearCanvas()" class="px-6 py-3 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 transition-colors font-medium">
+                        Clear
+                    </button>
+                    <button onclick="getInsight()" class="px-6 py-3 bg-violet-600 text-white rounded-full shadow-lg hover:bg-violet-700 transition-colors font-medium">
+                        Get Insight
+                    </button>
+                </div>
+
+                <input type="file" id="image-upload" accept="image/*" class="mt-4 text-sm text-gray-500">
+                <button onclick="uploadImageForInsight()" class="mt-2 px-4 py-2 bg-violet-500 text-white rounded-full text-sm hover:bg-violet-600 transition-colors">
+                    Upload Image
+                </button>
+            </div>
+            
+            <!-- Future Self View (Hidden by default) -->
+            <div id="future-self-view" class="hidden flex flex-col h-full items-center justify-center p-4 text-center">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Letter From Your Future Self</h2>
+                <p class="text-gray-500 text-sm mb-6">Tell me a little about what's on your mind right now, and I'll write you a letter from a future, wiser version of yourself.</p>
+                <textarea id="future-self-input" rows="4" class="w-full max-w-lg p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4" placeholder="e.g., I'm feeling so overwhelmed by my exam results and my parents' expectations."></textarea>
+                <button onclick="generateLetter()" class="px-6 py-3 bg-violet-600 text-white rounded-full shadow-lg hover:bg-violet-700 transition-colors font-medium">
+                    Generate Letter
+                </button>
+                <div id="future-self-letter-output" class="hidden w-full max-w-lg mt-6 p-6 bg-violet-50 rounded-xl shadow-inner text-left">
+                    <p class="text-sm text-gray-700 italic">Generating...</p>
+                </div>
+            </div>
+
+            <!-- Thought Stream View (Hidden by default) -->
+            <div id="thought-stream-view" class="hidden flex flex-col h-full items-center justify-center p-4">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Visualize Your Thoughts</h2>
+                <p class="text-gray-500 text-sm italic mb-6">Type a single feeling or thought, and watch it become a calming visual.</p>
+                <canvas id="thought-stream-canvas" class="w-full max-w-lg h-64 bg-gray-50 rounded-xl shadow-inner"></canvas>
+                <div class="flex space-x-4 mt-4 w-full max-w-lg">
+                    <input type="text" id="thought-stream-input" placeholder="e.g., overwhelmed, calm, restless..." class="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                    <button onclick="visualizeThought()" class="p-3 bg-violet-600 text-white rounded-full shadow-lg hover:bg-violet-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+             <!-- Symphony of Thoughts View (Hidden by default) -->
+            <div id="symphony-view" class="hidden flex flex-col h-full items-center justify-center p-4 text-center">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Symphony of Thoughts</h2>
+                <p class="text-gray-500 text-sm mb-6">Focus on what you're feeling. I will create a unique soundscape for you.</p>
+                <button onclick="generateSymphony()" class="px-8 py-4 bg-fuchsia-600 text-white rounded-full shadow-lg hover:bg-fuchsia-700 transition-colors font-medium text-lg">
+                    Generate My Symphony
+                </button>
+                <div id="symphony-output" class="hidden w-full max-w-lg mt-6 p-4 bg-fuchsia-50 rounded-xl shadow-inner">
+                    <p class="text-sm text-gray-700 italic">Playing your unique soundscape...</p>
+                    <audio id="symphony-audio" controls class="w-full mt-4"></audio>
+                </div>
+            </div>
+
+            <!-- Memory Mosaic View (Hidden by default) -->
+            <div id="mosaic-view" class="hidden flex flex-col h-full items-center justify-center p-4 text-center">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Memory Mosaic</h2>
+                <p class="text-gray-500 text-sm mb-6">Enter a challenge you're facing. I will create a mosaic of hope and resilience for you.</p>
+                <textarea id="mosaic-input" rows="3" class="w-full max-w-lg p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4" placeholder="e.g., I'm feeling defeated after failing my test."></textarea>
+                <button onclick="generateMosaic()" class="px-6 py-3 bg-teal-600 text-white rounded-full shadow-lg hover:bg-teal-700 transition-colors font-medium">
+                    Create Mosaic
+                </button>
+                <div id="mosaic-output" class="hidden w-full max-w-lg mt-6 p-4 bg-teal-50 rounded-xl shadow-inner">
+                    <p class="text-sm text-gray-700 italic">Creating your mosaic...</p>
+                </div>
+            </div>
+
+            <!-- Echo Chamber View (Hidden by default) -->
+            <div id="echo-view" class="hidden flex flex-col h-full items-center justify-center p-4 text-center">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Echo Chamber of Validation</h2>
+                <p class="text-gray-500 text-sm mb-6">Enter the demotivating message you received. I will give you a new perspective.</p>
+                <textarea id="echo-input" rows="4" class="w-full max-w-lg p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4" placeholder="e.g., 'You can't do it.' or 'Your app has so many bugs.'"></textarea>
+                <button onclick="processValidation()" class="px-6 py-3 bg-violet-600 text-white rounded-full shadow-lg hover:bg-violet-700 transition-colors font-medium">
+                    Process Message
+                </button>
+                <div id="echo-output" class="hidden w-full max-w-lg mt-6 p-6 bg-violet-50 rounded-xl shadow-inner text-left">
+                    <p class="text-sm text-gray-700 italic">Processing...</p>
+                </div>
+            </div>
+
+            <!-- Perspective Stories View (Hidden by default) -->
+            <div id="stories-view" class="hidden flex flex-col h-full items-center justify-center p-4 text-center">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Perspective Stories</h2>
+                <p class="text-gray-500 text-sm mb-6">Share what's bothering you, and I will create a story to help you gain perspective.</p>
+                <textarea id="story-input" rows="3" class="w-full max-w-lg p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-4" placeholder="e.g., 'I don't have enough money for a new phone.'"></textarea>
+                <button onclick="generateStory()" class="px-6 py-3 bg-emerald-600 text-white rounded-full shadow-lg hover:bg-emerald-700 transition-colors font-medium">
+                    Generate Story
+                </button>
+                <div id="story-output" class="hidden w-full max-w-lg mt-6 p-6 bg-emerald-50 rounded-xl shadow-inner text-left">
+                    <p class="text-sm text-gray-700 italic">Generating...</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation Bar -->
+        <nav class="flex justify-around items-center bg-gray-100 p-4 border-t border-gray-200">
+            <button onclick="showDailyBridge()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM8 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm8 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                <span>Today</span>
+            </button>
+            <button onclick="showChat()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                <span>Chat</span>
+            </button>
+            <button onclick="showCommunity()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 15H6l-2 2V4h16v13z"></path></svg>
+                <span>Wall</span>
+            </button>
+            <button onclick="showNotes()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg>
+                <span>Notes</span>
+            </button>
+            <button onclick="showCanvas()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 6l-2.29 2.29 2.15 2.15-4.24 4.24 2.12 2.12 4.24-4.24 2.12 2.12zM21 16l-1.76-1.76 1.76-1.76-4.24-4.24-1.76 1.76-1.76-1.76-4.24 4.24 1.76 1.76-1.76 1.76 4.24 4.24 1.76-1.76z"></path></svg>
+                <span>Canvas</span>
+            </button>
+            <button onclick="showFutureSelf()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM8 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm8 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                <span>Future Self</span>
+            </button>
+            <button onclick="showThoughtStream()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM8 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm8 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                <span>Thoughts</span>
+            </button>
+            <button onclick="showSymphony()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 16h-2V6h2v12zm4 0h-2V6h2v12zM12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"></path></svg>
+                <span>Symphony</span>
+            </button>
+            <button onclick="showMosaic()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 16h-2V6h2v12zm4 0h-2V6h2v12zM12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"></path></svg>
+                <span>Mosaic</span>
+            </button>
+            <button onclick="showEcho()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM8 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm8 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                <span>Echo</span>
+            </button>
+            <button onclick="showStories()" class="flex flex-col items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 16h-2V6h2v12zm4 0h-2V6h2v12zM12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"></path></svg>
+                <span>Stories</span>
+            </button>
+        </nav>
+
+        <!-- Skill Modal -->
+        <div id="skill-modal" class="modal flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center text-center">
+                <h3 id="skill-modal-title" class="text-2xl font-bold text-gray-900 mb-4"></h3>
+                <p id="skill-modal-content" class="text-gray-700 mb-6"></p>
+                <button onclick="closeModal('skill-modal')" class="w-full p-3 bg-violet-600 text-white rounded-full hover:bg-violet-700 transition-colors font-medium">
+                    Done
+                </button>
+            </div>
+        </div>
+
+        <!-- Insight Modal (for Canvas) -->
+        <div id="insight-modal" class="modal flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center text-center">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Your Insight</h3>
+                <p id="insight-content" class="text-gray-700 mb-6"></p>
+                <button onclick="closeModal('insight-modal')" class="w-full p-3 bg-violet-600 text-white rounded-full hover:bg-violet-700 transition-colors font-medium">
+                    Close
+                </button>
+            </div>
+        </div>
+
+        <!-- Audio Player Modal for Symphony -->
+        <div id="symphony-player-modal" class="modal flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center text-center">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Your Symphony</h3>
+                <p class="text-gray-700 mb-6">Listen to the soundscape I created for you.</p>
+                <audio id="symphony-audio-player" controls class="w-full mb-4"></audio>
+                <button onclick="closeModal('symphony-player-modal')" class="w-full p-3 bg-violet-600 text-white rounded-full hover:bg-violet-700 transition-colors font-medium">
+                    Close
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const dailyBridgeView = document.getElementById('daily-bridge-view');
+        const chatView = document.getElementById('chat-view');
+        const toolkitView = document.getElementById('toolkit-view');
+        const communityView = document.getElementById('community-view');
+        const notesView = document.getElementById('notes-view');
+        const canvasView = document.getElementById('canvas-view');
+        const futureSelfView = document.getElementById('future-self-view');
+        const thoughtStreamView = document.getElementById('thought-stream-view');
+        const symphonyView = document.getElementById('symphony-view');
+        const mosaicView = document.getElementById('mosaic-view');
+        const echoView = document.getElementById('echo-view');
+        const storiesView = document.getElementById('stories-view');
+        const chatContainer = document.getElementById('chat-container');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const skillModal = document.getElementById('skill-modal');
+        const skillModalTitle = document.getElementById('skill-modal-title');
+        const skillModalContent = document.getElementById('skill-modal-content');
+        const listenBtn = document.getElementById('listen-btn');
+        const postsContainer = document.getElementById('posts-container');
+        const communityInput = document.getElementById('community-input');
+        const notesContainer = document.getElementById('notes-container');
+        const noteInput = document.getElementById('note-input');
+        const moodCanvas = document.getElementById('mood-canvas');
+        const ctx = moodCanvas.getContext('2d');
+        const imageUpload = document.getElementById('image-upload');
+        const colorPalette = document.getElementById('color-palette');
+        const insightModal = document.getElementById('insight-modal');
+        const insightContent = document.getElementById('insight-content');
+        const futureSelfInput = document.getElementById('future-self-input');
+        const futureSelfOutput = document.getElementById('future-self-letter-output');
+        const thoughtStreamCanvas = document.getElementById('thought-stream-canvas');
+        const thoughtStreamCtx = thoughtStreamCanvas.getContext('2d');
+        const thoughtStreamInput = document.getElementById('thought-stream-input');
+        const symphonyOutput = document.getElementById('symphony-output');
+        const symphonyAudioPlayer = document.getElementById('symphony-audio-player');
+        const mosaicInput = document.getElementById('mosaic-input');
+        const mosaicOutput = document.getElementById('mosaic-output');
+        const symphonyPlayerModal = document.getElementById('symphony-player-modal');
+        const echoInput = document.getElementById('echo-input');
+        const echoOutput = document.getElementById('echo-output');
+        const storyInput = document.getElementById('story-input');
+        const storyOutput = document.getElementById('story-output');
+
+        // Drawing state
+        let isDrawing = false;
+        let currentColor = '#3b82f6';
+        let colorUsage = {};
+
+        // Functions for Navigation
+        function hideAllViews() {
+            dailyBridgeView.classList.add('hidden');
+            chatView.classList.add('hidden');
+            toolkitView.classList.add('hidden');
+            communityView.classList.add('hidden');
+            notesView.classList.add('hidden');
+            canvasView.classList.add('hidden');
+            futureSelfView.classList.add('hidden');
+            thoughtStreamView.classList.add('hidden');
+            symphonyView.classList.add('hidden');
+            mosaicView.classList.add('hidden');
+            echoView.classList.add('hidden');
+            storiesView.classList.add('hidden');
+        }
+        
+        function showDailyBridge() {
+            hideAllViews();
+            dailyBridgeView.classList.remove('hidden');
+        }
+
+        function showChat() {
+            hideAllViews();
+            chatView.classList.remove('hidden');
+        }
+
+        function showToolkit() {
+            hideAllViews();
+            toolkitView.classList.remove('hidden');
+        }
+
+        function showCommunity() {
+            hideAllViews();
+            communityView.classList.remove('hidden');
+        }
+
+        function showNotes() {
+            hideAllViews();
+            notesView.classList.remove('hidden');
+        }
+
+        function showCanvas() {
+            hideAllViews();
+            canvasView.classList.remove('hidden');
+            resizeCanvas();
+        }
+
+        function showFutureSelf() {
+            hideAllViews();
+            futureSelfView.classList.remove('hidden');
+        }
+        
+        function showThoughtStream() {
+            hideAllViews();
+            thoughtStreamView.classList.remove('hidden');
+            resizeThoughtStreamCanvas();
+            clearThoughtStreamCanvas();
+        }
+
+        function showSymphony() {
+            hideAllViews();
+            symphonyView.classList.remove('hidden');
+        }
+
+        function showMosaic() {
+            hideAllViews();
+            mosaicView.classList.remove('hidden');
+        }
+
+        function showEcho() {
+            hideAllViews();
+            echoView.classList.remove('hidden');
+        }
+        
+        function showStories() {
+            hideAllViews();
+            storiesView.classList.remove('hidden');
+        }
+
+
+        // Chat Logic
+        const responses = {
+            "exams": "Exams can feel super overwhelming. Take a deep breath. Try the 'Exam Calm' skill in your toolkit when you need a break.",
+            "parents": "The pressure from family can be really hard. Remember that your worth isn't just about what you achieve. Your parents care about you, and maybe they just don't know how to express it differently.",
+            "lonely": "It's completely normal to feel lonely sometimes, especially in a new place like a hostel. I'm here to chat, and you can also check out the 'Loneliness Buster' in the toolkit.",
+            "stressed": "Stress is tough. Try focusing on your breathing for a minute. Inhale slowly, and exhale slowly. You've got this.",
+            "default": "That's a lot to deal with. I hear you. Could you tell me a little more about what's on your mind? Sometimes just talking helps.",
+            "greetings": "Hey! How's it going? I'm here if you want to talk about anything.",
+            "thanks": "You're welcome! I'm here anytime you need to chat.",
+            "what can you do": "I'm a companion to help you reflect and learn. I can chat, help you track your mood, and share mini-skills for daily life. I'm not a replacement for a therapist, but a bridge to help."
+        };
+
+        function addMessage(text, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('flex', 'items-end', 'space-x-2');
+
+            let bubbleClass = '';
+            let avatar = '';
+
+            if (sender === 'user') {
+                messageElement.classList.add('justify-end');
+                bubbleClass = 'user-bubble';
+                avatar = `
+                    <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center">
+                         <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                    </div>`;
+            } else {
+                bubbleClass = 'ai-bubble';
+                avatar = `
+                    <div class="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 20h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>`;
+            }
+
+            messageElement.innerHTML = `
+                ${sender === 'ai' ? avatar : ''}
+                <div class="chat-bubble ${bubbleClass} shadow-sm animate-fade-in-up">
+                    <p class="text-sm">${text}</p>
+                </div>
+                ${sender === 'user' ? avatar : ''}
+            `;
+            
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function getResponse(userMessage) {
+            userMessage = userMessage.toLowerCase();
+            if (userMessage.includes("exam") || userMessage.includes("padhai")) {
+                return responses.exams;
+            }
+            if (userMessage.includes("parents") || userMessage.includes("mom") || userMessage.includes("dad")) {
+                return responses.parents;
+            }
+            if (userMessage.includes("lonely") || userMessage.includes("akela") || userMessage.includes("alone")) {
+                return responses.lonely;
+            }
+            if (userMessage.includes("stressed") || userMessage.includes("pressure") || userMessage.includes("tension")) {
+                return responses.stressed;
+            }
+            if (userMessage.includes("hello") || userMessage.includes("hi") || userMessage.includes("hey")) {
+                return responses.greetings;
+            }
+            if (userMessage.includes("thanks") || userMessage.includes("thank you")) {
+                return responses.thanks;
+            }
+            if (userMessage.includes("what can you do") || userMessage.includes("what are you") || userMessage.includes("what do you do")) {
+                return responses["what can you do"];
+            }
+            return responses.default;
+        }
+
+        sendBtn.addEventListener('click', () => {
+            const userMessage = chatInput.value.trim();
+            if (userMessage === '') return;
+
+            addMessage(userMessage, 'user');
+            chatInput.value = '';
+
+            setTimeout(() => {
+                const aiResponse = getResponse(userMessage);
+                addMessage(aiResponse, 'ai');
+            }, 500);
+        });
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+
+        // "Listen" Mode Logic
+        listenBtn.addEventListener('click', () => {
+            // Simulate voice recording and processing
+            const moods = ["happy", "anxious", "sad", "neutral"];
+            const randomMood = moods[Math.floor(Math.random() * moods.length)];
+
+            addMessage("Listening...", 'user'); // Simulate listening
+            setTimeout(() => {
+                addMessage(`I sense a **${randomMood}** tone. Let's explore that.`, 'ai');
+            }, 1500); // Simulate processing time
+            showChat();
+        });
+
+        // Community Wall Logic
+        const communityPosts = [
+            "Got 2 backlogs to clear. Padhai nahi ho rahi, bas tension hai.",
+            "Just feeling so lonely in my hostel room today. Missing ghar ka khana.",
+            "My parents don't understand that I need a break. All they see is marks.",
+            "Sometimes I feel like I'm on a treadmill and can't get off."
+        ];
+
+        function postToCommunity() {
+            const postText = communityInput.value.trim();
+            if (postText === '') return;
+
+            const postElement = document.createElement('div');
+            postElement.classList.add('bg-gray-100', 'p-4', 'rounded-xl', 'shadow-md', 'animate-fade-in-up');
+            postElement.innerHTML = `
+                <p class="text-sm text-gray-700 mb-2">"${postText}"</p>
+                <span class="text-xs text-gray-400">Anonymous | Just now</span>
+            `;
+            postsContainer.prepend(postElement);
+            communityInput.value = '';
+        }
+
+        // Community Notes Logic
+        const noteColors = ["bg-yellow-100", "bg-green-100", "bg-blue-100", "bg-red-100", "bg-fuchsia-100"];
+
+        function leaveNote() {
+            const noteText = noteInput.value.trim();
+            if (noteText === '') return;
+
+            const randomColor = noteColors[Math.floor(Math.random() * noteColors.length)];
+            const randomRotation = Math.floor(Math.random() * 6) - 3; // -3 to 3 degrees
+
+            const noteElement = document.createElement('div');
+            noteElement.classList.add(randomColor, 'p-4', 'rounded-xl', 'shadow-md', 'transform');
+            noteElement.style.transform = `rotate(${randomRotation}deg)`;
+            noteElement.innerHTML = `<p class="text-sm text-gray-800">"${noteText}"</p>`;
+            
+            notesContainer.prepend(noteElement);
+            noteInput.value = '';
+        }
+
+        // Modal Logic
+        function showModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Mini-Skills Logic
+        function startSkill(skill) {
+            const skills = {
+                "exam": {
+                    title: "2-Minute Exam Calm",
+                    content: "Let's take a quick break. Close your eyes. Inhale for 4 seconds, hold for 4, exhale for 6. Repeat this 3 times. You've got this."
+                },
+                "loneliness": {
+                    title: "Loneliness Buster",
+                    content: "Try one of these: 1. Listen to your favorite song, loudly. 2. Text a friend a funny meme. 3. Go for a short walk outside."
+                },
+                "sleep": {
+                    title: "Sleep Wind-Down",
+                    content: "It's time to rest. Try putting your phone away 30 minutes before bed. Read a book or listen to some calming music. Your mind needs a break too."
+                }
+            };
+            skillModalTitle.textContent = skills[skill].title;
+            skillModalContent.textContent = skills[skill].content;
+            showModal('skill-modal');
+        }
+        
+        // Mood Canvas Logic
+        function resizeCanvas() {
+            const rect = moodCanvas.parentElement.getBoundingClientRect();
+            moodCanvas.width = rect.width;
+            moodCanvas.height = rect.height;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        moodCanvas.addEventListener('mousedown', startDrawing);
+        moodCanvas.addEventListener('mouseup', stopDrawing);
+        moodCanvas.addEventListener('mousemove', draw);
+        moodCanvas.addEventListener('mouseout', stopDrawing);
+
+        moodCanvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startDrawing(e.touches[0]);
+        });
+        moodCanvas.addEventListener('touchend', stopDrawing);
+        moodCanvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            draw(e.touches[0]);
+        });
+
+        colorPalette.addEventListener('click', (e) => {
+            if (e.target.classList.contains('color-circle')) {
+                document.querySelector('.color-circle.selected').classList.remove('selected');
+                e.target.classList.add('selected');
+                currentColor = e.target.dataset.color;
+            }
+        });
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+
+            const rect = moodCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = currentColor;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            // Track color usage for insight
+            colorUsage[currentColor] = (colorUsage[currentColor] || 0) + 1;
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, moodCanvas.width, moodCanvas.height);
+            colorUsage = {}; // Reset color usage
+        }
+        
+        // Image Upload for Insight
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        clearCanvas();
+                        ctx.drawImage(img, 0, 0, moodCanvas.width, moodCanvas.height);
+                        // Simulate AI analysis and insight generation
+                        setTimeout(() => {
+                             insightContent.textContent = "I've analyzed your image. The colors and composition suggest a moment of deep reflection. It's okay to feel introspective.";
+                             showModal('insight-modal');
+                        }, 1000);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function getInsight() {
+            const colors = {
+                "#3b82f6": "calm and reflective", // Blue
+                "#ef4444": "a little frustrated or stressed", // Red
+                "#eab308": "feeling a spark of joy or energy", // Yellow
+                "#22c55e": "hopeful and balanced", // Green
+                "#6b7280": "feeling neutral or introspective" // Gray
+            };
+
+            let mostUsedColor = null;
+            let maxUsage = 0;
+
+            for (const color in colorUsage) {
+                if (colorUsage[color] > maxUsage) {
+                    maxUsage = colorUsage[color];
+                    mostUsedColor = color;
+                }
+            }
+            
+            let insight = "It's amazing how colors can tell a story. I see a mix of feelings here, and that's completely normal. Thanks for sharing this with me.";
+            if (mostUsedColor) {
+                insight = `Your canvas shows a lot of **${colors[mostUsedColor]}** feelings. It's okay to feel that way. Thanks for sharing this with me.`;
+            }
+
+            insightContent.textContent = insight;
+            showModal('insight-modal');
+        }
+        
+        function uploadImageForInsight() {
+            imageUpload.click();
+        }
+
+        // Future Self Logic
+        const futureSelfResponses = {
+            "overwhelmed by my exam results": "Hey, future you here. I know you feel like those results are everything right now. The pressure is immense, and it feels like the world is on your shoulders. But I'm writing to tell you that you're going to get through this. You'll learn that your worth isn't defined by a mark sheet. Keep taking small steps, be kind to yourself, and know that this moment is just a tiny part of your journey. You are so much more than this. You'll see. — Your Future Self.",
+            "parents' expectations": "Future me, here. I know how much you want to make them proud, and how heavy that expectation feels. What you don't realize yet is that the most important thing is for you to be happy. You'll find a way to honor yourself and your journey, even if it feels impossible right now. It gets better, and your relationship with your parents will evolve in beautiful ways. Just breathe. — Your Future Self.",
+            "lonely": "Hey, future you here. I remember how lonely you feel right now. That hostel room, the late nights, the feeling of being totally alone. I'm telling you, this isn't forever. You will find your people. You will build a community. The quiet moments you have now are building the strength you'll need later. Hang in there. You'll be okay. — Your Future Self.",
+            "default": "Hey, future you here. I'm writing to tell you that I'm proud of you. I know you're going through a lot right now, and it feels like it will never end. But trust me, you are going to get through this. What you're experiencing is temporary, and it's making you stronger than you know. Just keep going. — Your Future Self."
+        };
+
+        function generateLetter() {
+            const userText = futureSelfInput.value.trim().toLowerCase();
+            let letter = futureSelfResponses.default;
+            
+            if (userText.includes("exam")) {
+                letter = futureSelfResponses["overwhelmed by my exam results"];
+            } else if (userText.includes("parents")) {
+                letter = futureSelfResponses["parents' expectations"];
+            } else if (userText.includes("lonely") || userText.includes("hostel")) {
+                letter = futureSelfResponses.lonely;
+            }
+
+            futureSelfOutput.innerHTML = `<p class="text-sm text-gray-700 italic">Generating...</p>`;
+            futureSelfOutput.classList.remove('hidden');
+
+            setTimeout(() => {
+                futureSelfOutput.innerHTML = `<p class="text-gray-800 font-semibold mb-2">Letter from the Future:</p>
+                                             <p class="text-sm text-gray-700">${letter}</p>`;
+            }, 1500);
+        }
+
+        // Thought Stream Logic
+        
+        function resizeThoughtStreamCanvas() {
+            thoughtStreamCanvas.width = thoughtStreamCanvas.parentElement.offsetWidth;
+            thoughtStreamCanvas.height = thoughtStreamCanvas.parentElement.offsetHeight * 0.5;
+        }
+
+        window.addEventListener('resize', resizeThoughtStreamCanvas);
+        resizeThoughtStreamCanvas();
+
+        function clearThoughtStreamCanvas() {
+            thoughtStreamCtx.clearRect(0, 0, thoughtStreamCanvas.width, thoughtStreamCanvas.height);
+        }
+
+        function visualizeThought() {
+            const thought = thoughtStreamInput.value.trim().toLowerCase();
+            if (!thought) return;
+
+            clearThoughtStreamCanvas();
+
+            const colors = {
+                "stressed": ["#ef4444", "#f87171", "#fca5a5"], // Red shades
+                "anxious": ["#fde047", "#fef08a", "#fef9c3"], // Yellow shades
+                "lonely": ["#3b82f6", "#60a5fa", "#93c5fd"], // Blue shades
+                "calm": ["#22c55e", "#4ade80", "#86efac"], // Green shades
+                "overwhelmed": ["#6b7280", "#9ca3af", "#d1d5db"], // Gray shades
+                "happy": ["#f472b6", "#e879f9", "#c084fc"], // Pink/Purple shades
+                "default": ["#34d399", "#a7f3d0", "#d1fae5"] // Teal shades
+            };
+
+            const selectedColors = colors[Object.keys(colors).find(key => thought.includes(key))] || colors.default;
+
+            for (let i = 0; i < 50; i++) {
+                const x = Math.random() * thoughtStreamCanvas.width;
+                const y = Math.random() * thoughtStreamCanvas.height;
+                const radius = Math.random() * 20 + 5;
+                const color = selectedColors[Math.floor(Math.random() * selectedColors.length)];
+
+                thoughtStreamCtx.beginPath();
+                thoughtStreamCtx.arc(x, y, radius, 0, 2 * Math.PI);
+                thoughtStreamCtx.fillStyle = color;
+                thoughtStreamCtx.globalAlpha = 0.6;
+                thoughtStreamCtx.fill();
+                thoughtStreamCtx.globalAlpha = 1.0;
+            }
+
+            thoughtStreamInput.value = '';
+        }
+
+        // Symphony of Thoughts Logic
+        function generateSymphony() {
+            symphonyOutput.classList.remove('hidden');
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Simple tone.js-like synth simulation
+            function createSynth(frequency) {
+                const oscillator = audioContext.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+                const gainNode = audioContext.createGain();
+                gainNode.gain.setValueAtTime(0.01, audioContext.currentTime); // Start low
+                gainNode.gain.exponentialRampToValueAtTime(0.5, audioContext.currentTime + 1); // Ramp up
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2); // Ramp down
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                return oscillator;
+            }
+
+            // Create a randomized, calming soundscape
+            const frequencies = [220, 261, 329, 392, 440, 493];
+            const synthCount = Math.floor(Math.random() * 3) + 2; // 2-4 synths
+
+            for (let i = 0; i < synthCount; i++) {
+                const frequency = frequencies[Math.floor(Math.random() * frequencies.length)];
+                const startTime = Math.random() * 5; // Start at random times
+                const duration = Math.random() * 5 + 3; // Play for 3-8 seconds
+                
+                const synth = createSynth(frequency);
+                synth.start(audioContext.currentTime + startTime);
+                synth.stop(audioContext.currentTime + startTime + duration);
+            }
+            
+            // This is a placeholder as Tone.js is not included, and it's complex to implement here.
+            symphonyAudioPlayer.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+            symphonyAudioPlayer.play();
+            showModal('symphony-player-modal');
+        }
+
+        // Memory Mosaic Logic
+        const mosaicStories = [
+            "You passed that tough test you thought you'd fail. That strength is still in you.",
+            "Remember when you helped that friend out? That compassion is who you are.",
+            "That day you felt totally lost, and still got up and went to class? That's resilience.",
+            "Think of the joy you felt when your favorite team won. That feeling is still yours to access."
+        ];
+
+        function generateMosaic() {
+            const userText = mosaicInput.value.trim().toLowerCase();
+            let story = mosaicStories[Math.floor(Math.random() * mosaicStories.length)];
+
+            mosaicOutput.innerHTML = `<p class="text-sm text-gray-700 italic">Creating your mosaic...</p>`;
+            mosaicOutput.classList.remove('hidden');
+
+            setTimeout(() => {
+                mosaicOutput.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="p-4 bg-teal-100 rounded-xl shadow-md">
+                            <p class="text-sm text-gray-800">Your challenge: "${userText}"</p>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl shadow-md border-2 border-teal-200">
+                            <h3 class="font-semibold text-gray-900 mb-2">A Memory of Your Strength:</h3>
+                            <p class="text-sm text-gray-800">${story}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Placeholder for generative visuals -->
+                            <div class="w-full h-24 bg-gray-200 rounded-xl animate-pulse"></div>
+                            <div class="w-full h-24 bg-gray-200 rounded-xl animate-pulse"></div>
+                            <div class="w-full h-24 bg-gray-200 rounded-xl animate-pulse"></div>
+                            <div class="w-full h-24 bg-gray-200 rounded-xl animate-pulse"></div>
+                        </div>
+                    </div>
+                `;
+            }, 1500);
+        }
+
+        // Echo Chamber of Validation Logic
+        const validationResponses = {
+            "bugs": "That's a lot of feedback to take in. It's okay to feel discouraged, but don't let it overshadow your achievement. You built an entire app from scratch! That takes immense skill and courage. Their suggestions are just the next steps on your journey, not a measure of your worth.",
+            "you can't do it": "Hearing those words is incredibly painful. Your feelings are valid. But remember, the only person who can truly define your limits is you. You've already taken the first step, and that's the hardest part. Don't let someone else's doubt become your reality. Keep going.",
+            "default": "I hear you. It’s hard when you share something and it doesn’t go as you hoped. Remember the passion and hard work that went into your idea. That feeling is what matters most. Let’s focus on that. Your effort is an achievement in itself."
+        };
+
+        function processValidation() {
+            const userText = echoInput.value.trim().toLowerCase();
+            let response = validationResponses.default;
+
+            if (userText.includes("bugs")) {
+                response = validationResponses["bugs"];
+            } else if (userText.includes("can't do it") || userText.includes("can't make it")) {
+                response = validationResponses["you can't do it"];
+            }
+
+            echoOutput.innerHTML = `<p class="text-sm text-gray-700 italic">Processing...</p>`;
+            echoOutput.classList.remove('hidden');
+
+            setTimeout(() => {
+                echoOutput.innerHTML = `
+                    <p class="text-sm text-gray-700">${response}</p>
+                `;
+            }, 1500);
+        }
+
+        // Perspective Stories Logic
+        const storyResponses = {
+            "money": "Once, there was a young man named Rohan who longed for a camera to capture the beauty of his city. He had no money, but he had an old notebook and a pencil. Every day, he would draw the faces he saw and the stories he imagined behind them. His drawings became so full of life that people began to notice, and soon, a local gallery offered to showcase his art. Rohan learned that his true power wasn't in the tools he had, but in the unique way he saw the world.",
+            "phone": "There once was a student, Priya, who felt left out because all her friends had the latest phones and she had an old one. She spent her free time feeling anxious, comparing herself. One day, her phone broke. Without a screen to look at, she started reading, drawing, and talking to people in her hostel. She discovered a passion for gardening and found a community of people who valued her company, not her phone. She realized her life became richer when she stopped comparing and started living.",
+            "shoes": "A young girl named Maya was heartbroken because she couldn't afford new shoes for a school trip. Her old ones were worn out. But her grandmother taught her a secret: 'A true journey is not about your shoes, but the spirit in your heart.' Maya took her old shoes and painted them with vibrant colors and patterns. At the trip, everyone admired her unique, beautiful shoes, and Maya realized that her self-worth wasn't in what she had, but in her creativity and courage.",
+            "default": "Your feelings are valid, and it's okay to feel that way. Here is a story for you: A young person once felt a deep sense of lack, but they found a different kind of richness. By focusing on their own unique strengths and the small moments of beauty around them, they discovered a path forward. Their journey wasn't defined by what they lacked, but by the courage they found within themselves."
+        };
+
+        function generateStory() {
+            const userText = storyInput.value.trim().toLowerCase();
+            let story = storyResponses.default;
+
+            if (userText.includes("money") || userText.includes("afford")) {
+                story = storyResponses.money;
+            } else if (userText.includes("phone")) {
+                story = storyResponses.phone;
+            } else if (userText.includes("shoes")) {
+                story = storyResponses.shoes;
+            }
+
+            storyOutput.innerHTML = `<p class="text-sm text-gray-700 italic">Generating...</p>`;
+            storyOutput.classList.remove('hidden');
+
+            setTimeout(() => {
+                storyOutput.innerHTML = `<p class="text-gray-800 font-semibold mb-2">A Story for You:</p>
+                                             <p class="text-sm text-gray-700">${story}</p>`;
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
