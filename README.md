@@ -1,5 +1,8 @@
 # Youth-mental-wellness
 
+![Screenshot_21-9-2025_203336_](https://github.com/user-attachments/assets/93153710-fe88-4cfd-9def-e5456c07eee2)
+
+
 # Project Overview
 YOUTH MENTAL WELLNESS is a web-based prototype designed as a game-changing therapeutic AI companion for young Indians. It directly addresses the critical gaps in mental wellness accessibility caused by high costs and social stigma. Our solution moves beyond conventional chatbots by offering a unique multimodal approach, fostering genuine connection through an empathetic AI persona. Bloom aims to be an affordable, approachable, and always-available bridge to wellness, empowering young people to connect with their own inner strength in a safe, creative, and non-intrusive way.
 # The Problem & Our Solution
